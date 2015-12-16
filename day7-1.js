@@ -50,16 +50,18 @@ var parseLineToAtoms = function(line) {
 var commands = input.map(parseLineToAtoms);
 
 while (commands.length > 0) {
-  console.log(commands.length);
   commands = commands.filter(array => {
     var LH = array[0];
     var RH = array[1];
-    console.log(RH);
-
     switch (RH.length) {
     case 1:
-      eval(LH + ' = ' + RH.join(' '));
-      return false;
+      if (eval(RH[0]) == null) {
+        return true;
+      } else {
+        eval(LH + ' = ' + RH.join(' '));
+        return false;
+      }
+      break;
     case 2:
       if (eval(RH[1]) == null) {
         return true;
@@ -79,7 +81,5 @@ while (commands.length > 0) {
     }
   });
 }
-
-console.log(ns);
 
 process.stdout.write(ns.a.toString());
