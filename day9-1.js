@@ -16,12 +16,15 @@ let Graph = function() {
 };
 
 Graph.prototype.addEdge = function(data) {
-  let fromCity = data[0][0];
-  let toCity = data[0][1];
+  let cityA = data[0][0];
+  let cityB = data[0][1];
   let distance = data[1];
 
-  this.nodes[fromCity] = this.nodes[fromCity] || {edges: {}};
-  this.nodes[fromCity].edges[toCity] = distance;
+  this.nodes[cityA] = this.nodes[cityA] || {edges: {}};
+  this.nodes[cityA].edges[cityB] = distance;
+
+  this.nodes[cityB] = this.nodes[cityB] || {edges: {}};
+  this.nodes[cityB].edges[cityA] = distance;
 };
 
 Graph.prototype.pathFrom = function(fromCity) {
@@ -78,7 +81,6 @@ let shortestPath = cities.reduce(function(leastDist, city) {
   let dist = graph.pathFrom(city);
   if (dist < leastDist) leastDist = dist;
   return leastDist;
-}, Math.INFINITY);
-
+}, Infinity);
 
 process.stdout.write(shortestPath.toString());
