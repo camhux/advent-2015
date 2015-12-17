@@ -27,42 +27,52 @@ Graph.prototype.addEdge = function(data) {
   this.nodes[cityB].edges[cityA] = distance;
 };
 
-Graph.prototype.pathFrom = function(fromCity) {
+Graph.prototype.walkPaths = function() {
   let visited = new Set();
-  let dist = 0;
-  let node = this.nodes[fromCity];
+  let distances = [];
 
-  visited.add(fromCity);
+  let subroutine = (city, sum) => {
+    sum = sum == null ? 0 : sum;
+    let options = this.getUnvisitedEdges(city, visited);
+    if (Object.keys(options).length === 0) {
+      distances.push(sum);
+    } else {
+      visited.add(city);
+      for (let toCity in options) {
+        subroutine(toCity, sum + options[toCity]);
+      }
+      visited.delete(city);
+    }
+  };
 
-  while (visited.size < this.size) {
-    let farthestEdge = getFarthestUnvisitedEdge(node.edges, visited);
-    dist += node.edges[farthestEdge];
-    visited.add(farthestEdge);
-    node = this.nodes[farthestEdge];
-  }
+  let cities = Object.keys(this.nodes);
+  cities.forEach(city => {
+    subroutine(city);
+  });
 
-  console.log(visited);
-
-  return dist;
-
+  return distances;
 };
 
-function getFarthestUnvisitedEdge(edges, visited) {
-  let keys = Object.keys(edges).filter(key => !visited.has(key));
-  let farthestEdge = keys[0];
-  let greatestDist = edges[keys[0]];
+Graph.prototype.getUnvisitedEdges = function(city, visited) {
+  return filterObj(this.nodes[city].edges, (dist, toCity) => {
+    return !visited.has(toCity);
+  });
+};
 
-  for (let i = 1; i < keys.length; i++) {
-    let key = keys[i];
-    let dist = edges[key];
+function mapObj(obj, fn) {
+  let keys = Object.keys(obj);
+  return keys.map(key => {
+    fn(obj[key], key);
+  });
+}
 
-    if (dist > greatestDist) {
-      greatestDist = dist;
-      farthestEdge = key;
-    }
+function filterObj(obj, fn) {
+  let keys = Object.keys(obj);
+  let out = {};
+  for (let key of keys) {
+    if (fn(obj[key], key)) out[key] = obj[key];
   }
-
-  return farthestEdge;
+  return out;
 }
 
 Object.defineProperty(Graph.prototype, 'size', {
@@ -77,13 +87,9 @@ let graph = new Graph();
 
 lines.forEach(graph.addEdge.bind(graph));
 
-let cities = Object.keys(graph.nodes);
-
-let longestPath = cities.reduce(function(greatestDist, city) {
-  let dist = graph.pathFrom(city);
-  console.log(dist);
-  if (dist > greatestDist) greatestDist = dist;
-  return greatestDist;
+let distances = graph.walkPaths();
+let longestPath = distances.reduce(function(largest, dist) {
+  return Math.max(largest, dist);
 }, 0);
 
 process.stdout.write(longestPath.toString());
