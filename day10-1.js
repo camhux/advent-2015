@@ -10,7 +10,7 @@ let lookAndSay = function(string) {
   let runChar = charArray[0];
   let runLength = 1;
 
-  charArray.slice(1).forEach((char, i, array) => {
+  charArray.slice(1).forEach((char) => {
     if (char !== runChar) {
       outCharArray.push(runLength.toString());
       outCharArray.push(runChar);
